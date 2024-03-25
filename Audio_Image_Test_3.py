@@ -3,9 +3,12 @@ import time
 import pygame
 
 def Audio(audio_path, play_time):
+
     try:
         pygame.init()
+
         pygame.mixer.music.load(audio_path)
+        
         pygame.mixer.music.play()
         
         time.sleep(play_time)
@@ -52,5 +55,3 @@ thread_Image = threading.Thread(target= showImage, args=(img_path, ))
 
 thread_Audio.start()
 thread_Image.start()
-
-thread_Audio.join()
