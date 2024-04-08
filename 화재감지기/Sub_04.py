@@ -12,8 +12,8 @@ def on_message(client, userdata, msg):
     measurement = eval(msg.payload.decode())
     print(measurement)
     print(type(measurement[0]))
-#list 0번은 int형
-#list 1번은 str형
+    #list 0번은 int형
+    #list 1번은 str형
 
 client = mqtt.Client()
 client.connect(server, 1883, 60)
