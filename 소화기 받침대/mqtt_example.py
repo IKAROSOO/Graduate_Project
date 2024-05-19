@@ -15,6 +15,9 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect("mqtt.eclipse.org", 1883, 60)
+client.connect("test.mosquitto.org", 1883, 60)
+
+#mqtt.eclipse.org는 더 이상 사용불가
+#test.mosquitto.org로 변경
 
 client.loop_forever()
