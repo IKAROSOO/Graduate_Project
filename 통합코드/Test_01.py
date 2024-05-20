@@ -5,13 +5,14 @@ import paho.mqtt.client as mqtt
 
 TOPICS = [("topic/audio", 0), ("topic/img", 0)]
 
+server = "18.116.23.110"       #test.mosquitto.org
+                                #18.116.23.110 -> 건희가 만든 서버
 global stop_audio_flag
 stop_audio_flag = False
 global close_img_flag
 close_img_flag = False
 
 pygame.init()
-
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with Result Code" + str(rc))
@@ -42,12 +43,12 @@ def on_message(client, userdata, msg):
             close_img_flag = True
         close_img_flag = message
 
-def mqtt_thread():
+def mqtt_thread(server):
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.connect("test.mosquitto.org", 1883, 60)
+    client.connect(server, 1883, 60)
 
     client.loop_forever()
 
@@ -83,7 +84,7 @@ img_path = './ヨルシカ.jpg'
 audio_path = './パレード.mp3'
 
 
-thread_Mqtt = threading.Thread(target= mqtt_thread)
+thread_Mqtt = threading.Thread(target= mqtt_thread, args= (server, ))
 thread_Audio = threading.Thread(target= playAudio, args= (audio_path, ))
 thread_ShowImage = threading.Thread(target= showImage, args= (img_path, ))
 

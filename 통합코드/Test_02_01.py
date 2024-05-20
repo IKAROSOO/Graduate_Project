@@ -34,11 +34,12 @@ def mqtt_thread():
 
     time.sleep(0.1)
 
-def TTS_thread(text):
+def TTS_thread(text, savepoint):
     tts = gTTS(text=text, lang='ko')
-    tts.save(TTS.mp3)
+    tts.save(savepoint)
 
-text = "현재 불이 난 곳은 {}".format()
+text = "현재 불이 난 곳은 101호입니다"
+savepoint = "./TTS.mp3"
 
 thread_Mqtt = threading.Thread(target= mqtt_thread)
-thread_TTS = threading.Thread(target= TTS_thread, args= ())
+thread_TTS = threading.Thread(target= TTS_thread, args= (text, savepoint))
