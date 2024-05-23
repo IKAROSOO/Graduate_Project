@@ -1,6 +1,5 @@
 from gtts import gTTS
 
-
 #mqtt  subscibe 하면 []
 text = "TTS와 Subprocess의 연동을 하기 위한 테스트 코드입니다."
 
