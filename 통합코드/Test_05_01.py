@@ -15,6 +15,9 @@ stop_flag = False
 global Fire_locate
 Fire_locate = None
 
+global img_path
+img_path = './ヨルシカ.jpg'
+
 pygame.init()
 
 def on_connect(client, userdata, flags, rc):
@@ -24,13 +27,15 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     global Fire_locate
+    global img_path
 
     topic = msg.topic
     message = msg.payload.decode()
 
     if topic == "topic/locate":
         Fire_locate = message
-        playAudio(Fire_locate)
+        threading.Thread(target= playAudio, args= (Fire_locate,)).start()
+        threading.Thread(target= showImage, args= (img_path, )).start()
 
 def mqtt_thread(server):
     client = mqtt.Client()
@@ -77,13 +82,11 @@ def createTTS(locate):
     fp.seek(0)
 
     return fp
-    
-img_path = './ヨルシカ.jpg'
 
 thread_Mqtt = threading.Thread(target= mqtt_thread, args= (server,))
 #thread_Audio = threading.Thread(target= playAudio, args= (Fire_locate,))
-thread_ShowImage = threading.Thread(target= showImage, args= (img_path, ))
+#thread_ShowImage = threading.Thread(target= showImage, args= (img_path, ))
 
 thread_Mqtt.start()
 #thread_Audio.start()
-thread_ShowImage.start()
+#thread_ShowImage.start()
