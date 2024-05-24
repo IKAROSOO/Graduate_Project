@@ -12,10 +12,10 @@ tts.write_to_fp(fp)
 fp.seek(0)
 
 # pygame을 사용하여 음성 재생
-#pygame.mixer.init()
-#pygame.mixer.music.load(fp)
-#pygame.mixer.music.play()
+pygame.mixer.init()
+pygame.mixer.music.load(fp)
+pygame.mixer.music.play()
 
 # 재생이 끝날 때까지 기다림
-#while pygame.mixer.music.get_busy():
-#    pygame.time.Clock().tick(10)
+while pygame.mixer.music.get_busy():
+    pygame.time.Clock().tick(10)
