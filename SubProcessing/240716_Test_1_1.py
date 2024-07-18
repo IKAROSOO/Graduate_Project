@@ -10,10 +10,10 @@ import webview
 fire_alert_file = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(fire_alert_file, '240716_Test_1_2.py')
 
-image1_path = "evacuate_plan.jpg"
-image2_path = "fire_manual.jpg"
+image1_path = os.path.join(fire_alert_file, "evacuate_plan.jpg")
+image2_path = os.path.join(fire_alert_file, "fire_manual.jpg")
 
-TOPICS = [("+/fire_alert", 0)]
+TOPICS = [("fire_detector/fire_alert", 0)]
 
 server = "3.132.26.214"
 
@@ -27,6 +27,13 @@ root.title("Weather App")
 photo = None
 window = None
 
+win = tk.Tk()
+win.withdraw()
+width = win.winfo_screenwidth()
+height = win.winfo_screenheight()
+win_size = (width, height)
+win.destroy()
+
 def on_connect(client, userdata, flags, rc):
     print("Connected with Result Code : " + str(rc))
     client.subscribe(TOPICS)
@@ -34,15 +41,15 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     global switch_process
 
-    topic = msg.topic
     message = msg.payload.decode()
 
-    if topic == "+/fire_alert":
+    if message != None:
         print("Fire Outbreaked!!")
+
+
 
         #switch_process = True
         stop_process()
-        
 
 def mqtt_Thread(server):
     client = mqtt.Client()
@@ -56,11 +63,11 @@ def mqtt_Thread(server):
 #MQTT가 들어왔을 때 전부 종료하는 함수
 def stop_process():
     global window
+
+    root.withdraw()
     if window:
         window.destroy()
     
-    root.quit()
-
     subprocess.Popen(["python", file_path])
 
 #이미지 표시를 위한 함수
@@ -68,7 +75,7 @@ def display_image(image_path):
     global photo
 
     img = Image.open(image_path)
-    img = img.resize((800, 480), Image.LANCZOS)
+    img = img.resize(win_size, Image.LANCZOS)
 
     photo = ImageTk.PhotoImage(img)
 
@@ -78,17 +85,18 @@ def display_image(image_path):
 #웹 뷰 표시를 위한 함수
 def show_weather():
     global window
-    root.withdraw()
     
+    root.withdraw()    
     label.pack_forget()
-    window = webview.create_window("Weather", "http://3.132.26.214:8080", width = 800, height = 480)
+    window = webview.create_window("Weather", "http://3.132.26.214:8080", width= width, height= height)
     webview.start(destroy_weather, window)
 
 #웹 뷰 종료를 위한 함수
-def destroy_weather():
+def destroy_weather(window):
+    #매개변수가 반드시 존재해야 한다.
     global image1_path
 
-    time.sleep(30)
+    time.sleep(5)
     window.destroy()
 
     label.pack(padx=10, pady=10)
@@ -98,19 +106,22 @@ def destroy_weather():
 def job_image1():
     print("Displaying image {} at ".format(image1_path), time.strftime("%H : %M : %S"))
     display_image(image1_path)
-    root.after(30000, job_image2)
+    root.after(5000, job_image2)
 
 def job_image2():
     print("Displaying image {} at ".format(image2_path), time.strftime("%H : %M : %S"))
     display_image(image2_path)
-    root.after(30000, schedule_show_weather)
+    root.after(5000, schedule_show_weather)
 
 def schedule_show_weather():
     print("Scheduling webview at", time.strftime("%H : %M : %S"))
-    root.after(30000, show_weather)
+    root.after(5000, show_weather)
 
 def noraml_routine():
     job_image1()
+
+label = tk.Label(root)
+label.pack(padx=10, pady=10)
 
 Thread_Mqtt = threading.Thread(target= mqtt_Thread, args= (server,))
 Thread_Mqtt.start()
