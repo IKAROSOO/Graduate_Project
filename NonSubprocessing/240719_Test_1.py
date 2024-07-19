@@ -1,12 +1,15 @@
 from PIL import Image, ImageTk
+from gtts import gTTS
 import os
 import time
+import pygame
 import paho.mqtt.client as mqtt
 import threading
 import tkinter as tk
 import webview
 
 fire_alert_file = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(fire_alert_file, '240718_Test_2_2.py')
 
 image1_path = os.path.join(fire_alert_file, "evacuate_plan.jpg")
 image2_path = os.path.join(fire_alert_file, "fire_manual.jpg")
@@ -16,11 +19,6 @@ TOPICS = [("+/room", 0), ("+/fire_alert", 0)]
 server = "3.132.26.214"
 
 Room = None
-#화재가 난 곳의 방 호수
-
-#switch_process = False
-#사용할 이유가 사라지면서 주석처리
-#def on_message에 있는 switch_process 또한 주석처리
 
 root = tk.Tk()
 root.title("Weather App")
@@ -53,6 +51,12 @@ def on_message(client, userdata, msg):
     elif topic.endswith("/fire_alert"):
         print("Fire Outbreaked!!")
 
+        Image_Thread = threading.Thread(target= showImage, args=(image1_path))
+        Audio_Thread = threading.Thread(target= playAudio, args=(Room))
+
+        Image_Thread.start()
+        Audio_Thread.start()
+    
 def mqtt_Thread(server):
     client = mqtt.Client()
     client.on_connect = on_connect
@@ -62,21 +66,6 @@ def mqtt_Thread(server):
 
     client.loop_forever()
 
-#MQTT가 들어왔을 때 전부 종료하는 함수
-def stop_process():
-    global window
-    global Room
-
-    root.withdraw()
-    root.quit()
-
-    if window:
-        root.quit()
-        window.destroy()  
-
-    os.system(f"python3 240718_Test_2_2.py {Room}")
-
-#이미지 표시를 위한 함수
 def display_image(image_path):
     global photo
 
@@ -125,6 +114,71 @@ def schedule_show_weather():
 
 def noraml_routine():
     job_image1()
+
+#-----------위에는 SUbprocessing의 1번 코드
+
+def playAudio(locate):
+    if locate is not None:
+        while True:
+            buffer = createTTS(locate)
+            buffer.seek(0)
+
+            Audio = pygame.mixer.Sound(buffer)
+            Audio.play()
+
+            while pygame.mixer.get_busy():
+                pygame.time.Clock().tick(0)
+            
+            Audio.stop()
+
+            del Audio
+            buffer.close()
+
+            time.sleep(10)
+
+def showImage(img1_path):
+    win = tk.Tk()
+    width = win.winfo_screenwidth()
+    height = win.winfo_screenheight()
+    size = (width, height)
+
+    screen = pygame.display.set_mode(size)
+    
+    img_1 = pygame.image.load(img1_path)
+    img_1 = pygame.transform.scale(img_1, size)
+    
+    pygame.display.set_caption("Image Display")
+
+    running = True
+    flag = 0
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        
+        if flag == 0:
+            screen.blit(img_1, (0, 0))
+            pygame.display.flip()
+
+def createTTS(locate):
+    text = f"현재 화재가 발생한 곳은 {locate}호 입니다."
+    manual = """소화기를 불이 난 곳으로 옮겨주세요.
+            손잡이 부분의 안전핀을 뽑아 주세요.
+            바람을 등지고 서서 호스를 불쪽으로 향하게 해 주세요.
+            손잡이를 힘껏, 움켜쥐고 빗자루로 쓸듯이 뿌려주세요."""
+    
+    #text = text + manual
+
+    tts = gTTS(text = text, lang = "ko")
+
+    fp = io.BytesIO()
+    tts.write_to_fp(fp)
+    fp.seek(0)
+
+    return fp
+
+
 
 label = tk.Label(root)
 label.pack(padx=10, pady=10)

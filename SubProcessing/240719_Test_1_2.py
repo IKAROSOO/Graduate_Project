@@ -75,8 +75,8 @@ def createTTS(locate):
 
     return fp
 
-Image_Thread = threading.Thread(target= showImage, args=(Evacuate_img_path))
-Audio_Thread = threading.Thread(target= playAudio, args=(Recived_Room))
+Image_Thread = threading.Thread(target= showImage, args=(Evacuate_img_path, ))
+Audio_Thread = threading.Thread(target= playAudio, args=(Recived_Room, ))
 
 Image_Thread.start()
 Audio_Thread.start()
